@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Kendo Chart Sandbox</title>
+	
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+	<script src="angular.min.js"></script>	
+    <link rel="stylesheet" href="kendo.dataviz.min.css"/>
+    <script src="kendo.custom.min.js"></script>
+	
+	</head>
+<body>
+
+
+<div ng-app="myApp" ng-controller="myCtrl">
+  <div>
+	<div kendo-chart k-theme="'flat'" 
+	k-options="chart.content.option" 
+	k-rebind="chart.content.option"
+	 class="qc-widget-chart-height" style="height: 300px;"></div>
+</div>
+  
+</div>
+
+</body>
+
+
+<script>
+var app = angular.module('myApp', ["kendo.directives"]);
+app.controller('myCtrl', function($scope) {
+
+  $scope.chart = {
+		id: "qcEvacuationActivityTimeFromPlatform", title: "xx", content: {}
+	};
+
+		const results = [{
+	"TimeRange": "12:00 AM - 01:59 AM",
+	"Record": 0.0,
+	"EstimatedWeight": 0.0
+	},
+	{
+	"TimeRange": "02:00 AM - 03:59 AM",
+	"Record": 0.0,
+	"EstimatedWeight": 0.0
+	},
+	{
+	"TimeRange": "04:00 AM - 05:59 AM",
+	"Record": 0.0,
+	"EstimatedWeight": 0.0
+	},
+	{
+	"TimeRange": "06:00 AM - 07:59 AM",
+	"Record": 0.0,
+	"EstimatedWeight": 0.0
+	},
+	{
+	"TimeRange": "08:00 AM - 09:59 AM",
+	"Record": 0.0,
+	"EstimatedWeight": 0.0
+	},
+	{
+	"TimeRange": "10:00 AM - 11:59 AM",
+	"Record": 0.0,
+	"EstimatedWeight": 0.0
+	},
+	{
+	"TimeRange": "12:00 PM - 01:59 PM",
+	"Record": 0.0,
+	"EstimatedWeight": 0.0
+	},
+	{
+	"TimeRange": "02:00 PM - 03:59 PM",
+	"Record": 0.0,
+	"EstimatedWeight": 0.0
+	},
+	{
+	"TimeRange": "04:00 PM - 05:59 PM",
+	"Record": 0.0,
+	"EstimatedWeight": 0.0
+	},
+	{
+	"TimeRange": "06:00 PM - 07:59 PM",
+	"Record": 0.0,
+	"EstimatedWeight": 4.01
+	},
+	{
+	"TimeRange": "08:00 PM - 09:59 PM",
+	"Record": 4.0,
+	"EstimatedWeight": 0.386316
+	},
+	{
+	"TimeRange": "10:00 PM - 11:59 PM",
+	"Record": 10.0,
+	"EstimatedWeight": 16.0
+	}];
+
+const series = [
+	{
+		type: "column",
+		field: "EstimatedWeight",
+		categoryField: "TimeRange",
+		axis: "ESTIMATEDWEIGHT",
+		tooltip: {
+			visible: true,
+			template: (data) => {
+				return `${data.category} (${kendo.format("{0:N1}", data.value)} (t))`
+			}
+		}
+	},
+	{
+		type: "line",
+		field: "Record",
+		categoryField: "TimeRange",
+		axis: "TOTALRECORD",
+		tooltip: {
+			visible: true,
+			template: (data) => {
+				return `${data.category} (${kendo.format("{0:N0}", data.value)} Records)`
+			}
+		}
+}];
+
+ $scope.chart.content.dataSource = new kendo.data.DataSource({
+	data: results
+});
+
+var categories = results.map(a => a.TimeRange);
+var maxEstimatedWeight = Math.max(...results.map(a => a.EstimatedWeight));
+var maxRecord = Math.max(...results.map(a => a.Record));
+
+   $scope.chart.content.option = {
+	dataSource: $scope.chart.content.dataSource,
+	series: series,
+	title: {
+		text: `test`
+	},
+	categoryAxis: {
+		majorGridLines: {
+			visible: false
+		},
+		labels: {
+			rotation: -60
+		},
+		axisCrossingValues: [0, categories.length]
+	},
+	valueAxes: [
+		{
+			majorGridLines: {
+				visible: false
+			},
+			name: "ESTIMATEDWEIGHT",
+			title: { text: "Estimated Weight (t)" },
+			labels: {
+				format: "{0:N1}"
+			},
+			majorUnit: maxEstimatedWeight <= 0.5 ? 1 : undefined
+		},
+		{
+			majorGridLines: {
+				visible: false
+			},
+			name: "TOTALRECORD",
+			title: { text: "Total Record" },
+			labels: {
+				format: "{0:N0}"
+			},
+			majorUnit: maxRecord < 5 ? 1 : undefined
+		}
+	],
+};
+
+});
+</script>
+</html>
