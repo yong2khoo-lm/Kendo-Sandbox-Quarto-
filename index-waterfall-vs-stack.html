@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8"/>
+    <title>Kendo Chart Sample Stack Chart</title>
+	
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js" integrity="sha512-WFN04846sdKMIP5LKNphMaWzU7YpMyCU245etK3g/2ARYbPK9Ub18eG+ljU96qKRCWh+quCY7yefSmlkQw1ANQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+	<script src="angular.min.js"></script>	
+    <link rel="stylesheet" href="kendo.dataviz.min.css"/>
+    <script src="kendo.custom.min.js"></script>
+	<style>
+		.result tr:nth-child(even){background-color: #f2f2f2;}
+	</style>
+	</head>
+	
+
+<body>
+
+
+<div ng-app="myApp" ng-controller="myCtrl">
+ <div>
+	<div kendo-chart k-theme="'flat'" 
+	k-options="chart.content.option" 
+	k-rebind="chart.content.option"
+	 class="qc-widget-chart-height" 
+	 style="height: 300px;">
+	 </div>
+  </div>
+  <div>
+	<div kendo-chart k-theme="'flat'" 
+	k-options="chart2.content.option" 
+	k-rebind="chart2.content.option"
+	 class="qc-widget-chart-height" 
+	 style="height: 300px;">
+	 </div>
+  </div>
+
+</div>
+
+</body>
+
+
+<script>
+
+const app = angular.module('myApp', ["kendo.directives"]);
+app.controller('myCtrl', function($scope) {
+
+const data = [
+	{ou:"g1",dayRangeType:"h1",val:10},
+	{ou:"g1",dayRangeType:"h2",val:20},
+	{ou:"g2",dayRangeType:"h3",val:40}
+];
+const showWaterfall = async () => {
+	$scope.chart = { content: {option: null, dataSource: null}};
+
+	const series = [{
+			type: "waterfall",
+			field: "val",
+			categoryField: "dayRangeType"
+	}];
+
+	const dataSource = new kendo.data.DataSource({
+		data
+	});
+	
+	$scope.chart.content.option = {
+		dataSource,	series
+	};
+};
+
+const showStack = async() => {
+	$scope.chart2 = {content: {option: null, dataSource: null}};
+
+	const series = [{
+		type: "column",
+		field: "val",
+		categoryField: "ou",
+		stack: true
+	}];
+
+	const dataSource = new kendo.data.DataSource({
+		  data,
+		  group:{field: 'dayRangeType'}
+	});
+	
+	$scope.chart2.content.option = {
+		dataSource,	series
+	};
+}
+
+showWaterfall();
+showStack();
+
+});
+
+</script>
+</html>
