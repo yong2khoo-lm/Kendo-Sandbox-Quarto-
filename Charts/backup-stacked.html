@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base href="http://demos.telerik.com/kendo-ui/bar-charts/index">
+    <style>html { font-size: 14px; font-family: Arial, Helvetica, sans-serif; }</style>
+    <title>Chart - groupd data transform</title>
+    <link rel="stylesheet" href="//kendo.cdn.telerik.com/2016.2.504/styles/kendo.common-bootstrap.min.css" />
+    <link rel="stylesheet" href="//kendo.cdn.telerik.com/2016.2.504/styles/kendo.bootstrap.min.css" />
+
+    <script src="//kendo.cdn.telerik.com/2016.2.504/js/jquery.min.js"></script>
+    <script src="//kendo.cdn.telerik.com/2016.2.504/js/kendo.all.min.js"></script>
+</head>
+<body>
+<div id="example">
+    <div class="demo-section k-content wide">
+        <div id="chart" style=""></div>
+    </div>
+    <script>
+      
+      var data = [
+          {
+          "date": "2016-06-20",
+          "competitor": [
+            {
+                "price": 1223,
+                "competitorName": "competitorA"
+             },
+                      {
+                "price": 1222,
+                "competitorName": "competitorB"
+             }
+          ]
+       },
+          {
+          "date": "2016-06-09",
+          "competitor":       [
+                      {
+                "price": 1345,
+                "competitorName": "competitorA"
+             },
+                      {
+                "price": 1604,
+                "competitorName": "competitorC"
+             }
+          ]
+       },
+          {
+          "date": "2016-06-04",
+          "competitor": [
+            {
+                "price": 1343,
+                "competitorName": "competitorB"
+             },
+                      {
+                "price": 1604,
+                "competitorName": "competitorC"
+             }
+          ]
+       },
+          {
+          "date": "2016-05-29",
+          "competitor": [
+               {
+                "price": 1370,
+                "competitorName": "competitorD"
+             }
+          ]
+       }
+    ];
+      
+      var transData = [];
+      for (var i=0; i<data.length; i++){        
+        var date =  data[i].date;
+          for (var j=0; j<data[i].competitor.length; j++){
+            var obj = {}
+            obj.date = date;
+            obj.competitorName = data[i].competitor[j].competitorName;
+            obj.price =  data[i].competitor[j].price;
+            transData.push(obj);            
+          }          
+           
+      }
+      
+      const d2 = [
+        {n1:"g1",n2:"h1",val:10},
+        {n1:"g1",n2:"h2",val:20},
+        {n1:"g2",n2:"h3",val:40}
+        ];
+      
+      console.log(transData);
+      
+        function createChart() {
+            $("#chart").kendoChart({
+             theme: "material",
+             dataSource: {
+                  data: d2,
+                  group:{field: 'n2'}, 
+               /*
+                  sort: {field: "date", dir: "asc"},
+                  schema: {
+                      model: {
+                          fields: {
+                              date: {
+                                  type: "date"
+                              }
+                          }
+                      }
+                  }
+                  */
+              },
+              //legend: { visible: true, position: "bottom" },
+              //seriesDefaults: {type: 'column',},
+              
+              series: [{
+                  field: 'val',
+                  categoryField: "n1",
+                type: "column",
+                stack: true,
+              }]
+            });
+        }
+
+        $(document).ready(createChart);
+        $(document).bind("kendo:skinChange", createChart);
+    </script>
+</div>
+
+
+</body>
+</html>

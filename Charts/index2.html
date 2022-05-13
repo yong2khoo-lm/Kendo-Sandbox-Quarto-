@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8"/>
+    <title>Kendo Chart Sandbox</title>
+	
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js" integrity="sha512-WFN04846sdKMIP5LKNphMaWzU7YpMyCU245etK3g/2ARYbPK9Ub18eG+ljU96qKRCWh+quCY7yefSmlkQw1ANQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+	<script src="../angular.min.js"></script>	
+    <link rel="stylesheet" href="../kendo.dataviz.min.css"/>
+    <script src="../kendo.custom.min.js"></script>
+	<style>
+		.result tr:nth-child(even){background-color: #f2f2f2;}
+	</style>
+	</head>
+	
+
+<body>
+
+
+<div ng-app="myApp" ng-controller="myCtrl">
+  <div>
+	<div kendo-chart k-theme="'flat'" 
+	k-options="chart.content.option" 
+	k-rebind="chart.content.option"
+	 class="qc-widget-chart-height" 
+	 style="height: 300px;">
+	 </div>
+  </div>
+  <br/>
+  
+  <div>
+	<div kendo-chart k-theme="'flat'" 
+	k-options="chart2.content.option" 
+	k-rebind="chart2.content.option"
+	 class="qc-widget-chart-height" 
+	 style="height: 300px;">
+	 </div>
+  </div>
+  
+  <br/>
+  <div ng-repeat="a in gridData">
+		<h1>{{a.Key}} </h1>
+		<div ng-repeat="b in a.Val">
+			<h2>&emsp;{{b.Key}} ({{b.Val.length}})</h2>
+			<table style="padding-left:80px" class="result">
+			<th><tr><td>User Id</td><td>Last Updated On</td><td>Day Lapse</td></tr></th>
+			<tr ng-repeat="c in b.Val">
+				<td>{{c.UserId}}</td><td> {{c.LastUpdatedOn | date}} </td><td> {{c.ActualDayDiff}} </td>
+			</tr>
+			</table>
+		</div>
+  </div>
+</div>
+
+</body>
+
+
+<script>
+//By User
+//By Gang
+//By Module
+//What if one user with multi module? (one user group with multi access)
+
+const app = angular.module('myApp', ["kendo.directives"]);
+app.controller('myCtrl', function($scope) {
+const token = "Bearer AK-VNLZPxBd7pKXtjUYgJ3wxcLkAV9xvNXhhGjabByfMSnfABanD91Z8HJ3RjKSxcVQihh6c_uT0teErzpyuYHQWYa1D9SO5MVwxWnpt9oFxSKf0CPyhubQl0c5XTVXXml1ZWb5BiPpZTRwurDyK2fsW4pKuR4ivRBKlpVeFa_oWijAyDMiDu3N9KtNp-_4JC8en3814Iiywj9McJKEI7waRkLhznJiMyAKioOqr21t3ysjRKYmZNSUsbpQh6j3giONLqhsJ3HsD-5VVfv5ZpK-ER9_JkL1hkkARn32RcsGm8uMeV5ErcJLIkaYrUYjVuSExfj7LB-hgiloGMCqZpuLhfeUcd2N-DRqdNvwH5UOt8AKWsbKSfo7DMqNTlXzNbiVg9CWJwg9bjQplVYQSMHWVCqs";
+
+
+$scope.gridData = [];
+
+async function getData(){
+	const url = "http://localhost:47003/dboard/api/UserUpload/GetRaw";
+	const promise = await fetch(url, { 
+		method: 'get', 
+		headers: new Headers({
+			'Authorization': token, 
+			'Content-Type': 'application/x-www-form-urlencoded'
+		}), 
+	});
+	return await promise.json();
+}
+
+
+const showWaterfall = async () => {
+	$scope.chart = {
+		id: "abc", title: "xx", content: {option: null, dataSource: null}
+	};
+
+	const series = [
+		{
+			type: "waterfall",
+			field: "Total",
+			categoryField: "Type",
+			tooltip: {
+				visible: true,
+				template: (data) => {
+					return `${data.category} (${kendo.format("{0:N0}", data.value)})`
+				}
+			}
+		}
+		];
+
+		 $scope.chart.content.dataSource = new kendo.data.DataSource({
+			transport: {
+			read: async function(options){
+				const {Result} = await getData();
+				const d2 = _(Result).groupBy(a => `${a.Type}|${a.Seq}`).map((value, key) => ({
+					Type: key.split("|")[0],
+					Seq: key.split("|")[1],
+					Total: value.length
+				}))
+				.orderBy(a => a.Seq)
+				.value();
+				options.success(d2);
+				showGrid(Result);
+			}
+		  }
+		});
+		
+		$scope.chart.content.option = {
+			dataSource: $scope.chart.content.dataSource,
+			series,
+			categoryAxis: {
+				majorGridLines: {
+					visible: false
+				}
+			},
+			valueAxes: [
+				{
+					majorGridLines: {
+						visible: false
+					},
+					title: { text: "Total Users" },
+					labels: {
+						format: "{0:N0}"
+					}
+				}
+			],
+		};
+};
+
+
+
+const show3 = async() => {
+	$scope.chart2 = {id: "abc", title: "xx", content: {option: null, dataSource: null}};
+
+	const series = [{
+			type: "column",
+			field: "val",
+			categoryField: "n1",
+			stack: true
+		}];
+		const d3 = [
+					{n1:"g1",n2:"h1",val:10},
+					{n1:"g1",n2:"h2",val:20},
+					{n1:"g2",n2:"h3",val:40}
+					];
+
+		 $scope.chart2.content.dataSource = new kendo.data.DataSource({
+			  data: d3,
+              group:{field: 'n2'}, 
+		  
+		});
+		
+		$scope.chart2.content.option = {
+			dataSource: $scope.chart2.content.dataSource,
+			series,
+		};
+}
+
+const showStack = async () => {
+	$scope.chart2 = {id: "abc", title: "xx", content: {option: null, dataSource: null}};
+
+	const series = [{
+			type: "column",
+			field: "Total",
+			categoryField: "OUCode",
+			stack: true
+		}];
+		const d3 = [
+					{n1:"g1",n2:"h1",val:10},
+					{n1:"g1",n2:"h2",val:20},
+					{n1:"g2",n2:"h3",val:40}
+					];
+				/*	
+		const {Result} = await getData();
+		const d3b = Result;
+		console.log(d3b);
+		*/
+		
+		const {Result} = await getData();
+		const d2 = _(Result).groupBy(a => `${a.OUCode}|${a.Type}|${a.Seq}`).map((value, key) => 
+			{
+				const [OUCode, Type, Seq] = key.split("|");
+				const Total = value.length;
+				return {OUCode, Type, Seq, Total};
+			}
+		).value();
+		
+		 $scope.chart2.content.dataSource = new kendo.data.DataSource({
+			  data: d2,
+              group:{field: 'Type'}, 
+		  
+		});
+		
+		$scope.chart2.content.option = {
+			dataSource: $scope.chart2.content.dataSource,
+			series,
+		};
+		
+		$scope.$apply();
+};
+
+const showGrid = (Result) => {
+	const r2 = _(Result)
+				.groupBy(a => `${a.Type}|${a.Seq}`).map((value, key) => ({
+						Key: key.split("|")[0],
+						Seq: key.split("|")[1],
+						Val: _(value)
+								.groupBy(b => b.UserGroupDesc)
+								.map((value2, key2) => ({
+									Key: key2, 
+									Val: value2
+								}))
+								.value()
+					}))
+				.orderBy(a => a.Seq)
+				.value();
+	console.log('r2', r2);
+	$scope.gridData = r2;
+	$scope.$apply();
+	
+	const z = _($scope.gridData).map(b => b.Val.map(c => c.Val.length)).value();
+		
+	console.log("z",z);
+};
+		
+showWaterfall();
+showStack();
+//show3();
+});
+
+
+
+</script>
+
+<script>
+/*
+const getData = async() => {
+	//const url = ;
+	const url = "http://localhost:30002/token";
+	const data = { grant_type: 'password', username: 'lmsupport@lintramax.comclient_id=665ff30b-dfcd-4eef-897b-a3e640eb9176medium_type=web', password: 'test' };
+
+	fetch('url', {
+	  method: 'POST', // or 'PUT'
+	  headers: {
+		'Content-Type': 'application/json',
+	  },
+	  body: JSON.stringify(data),
+	})
+	.then(response => response.json())
+	.then(data => {
+	  console.log('Success:', data);
+	})
+	.catch((error) => {
+	  console.error('Error:', error);
+	});
+}
+*/
+
+	/*
+const initAll = async () => {
+
+
+	console.log("_data", _data);
+	const sumResult = _(_data).filter(a => a.Seq === 6).sumBy(a => a.ActualDayDiff);
+	console.log(
+	_(_data).filter(a => a.Seq === 6).sumBy(a => a.ActualDayDiff),
+	_(_data).filter(a => a.Seq === 5).sumBy(a => a.ActualDayDiff),
+	_(_data).filter(a => a.Seq === 4).sumBy(a => a.ActualDayDiff)
+	);
+	*/
+
+	/*
+	setInterval(()=> {
+		
+		const myChart = $("#myChart").data("kendoChart");
+	
+		console.log("myChart", myChart);
+		console.log($scope.chart.content.option);
+	}, 1000);
+	
+}
+*/
+
+</script>
+</html>

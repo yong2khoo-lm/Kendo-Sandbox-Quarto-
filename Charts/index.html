@@ -5,9 +5,9 @@
     <title>Kendo Chart Sandbox</title>
 	
     <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
-	<script src="angular.min.js"></script>	
-    <link rel="stylesheet" href="kendo.dataviz.min.css"/>
-    <script src="kendo.custom.min.js"></script>
+	<script src="../angular.min.js"></script>	
+    <link rel="stylesheet" href="../kendo.dataviz.min.css"/>
+    <script src="../kendo.custom.min.js"></script>
 	
 	</head>
 <body>
@@ -34,7 +34,7 @@ app.controller('myCtrl', function($scope) {
 		id: "qcEvacuationActivityTimeFromPlatform", title: "xx", content: {}
 	};
 
-		const results = [{
+const results = [{
 	"TimeRange": "12:00 AM - 01:59 AM",
 	"Record": 0.0,
 	"EstimatedWeight": 0.0
@@ -125,11 +125,11 @@ const series = [
 	data: results
 });
 
-var categories = results.map(a => a.TimeRange);
-var maxEstimatedWeight = Math.max(...results.map(a => a.EstimatedWeight));
-var maxRecord = Math.max(...results.map(a => a.Record));
+const categories = results.map(a => a.TimeRange);
+const maxEstimatedWeight = Math.max(...results.map(a => a.EstimatedWeight));
+const maxRecord = Math.max(...results.map(a => a.Record));
 
-   $scope.chart.content.option = {
+$scope.chart.content.option = {
 	dataSource: $scope.chart.content.dataSource,
 	series: series,
 	title: {

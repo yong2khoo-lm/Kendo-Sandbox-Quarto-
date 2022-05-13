@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Kendo Chart Sandbox</title>
+	
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+	<script src="../angular.min.js"></script>	
+    <link rel="stylesheet" href="../kendo.dataviz.min.css"/>
+	<link rel="stylesheet" href="../kendo.default.min.css"/>
+	<link rel="stylesheet" href="../kendo.bootstrap.min.css"/>
+	<link rel="stylesheet" href="../kendo.common.min.css"/>
+    <script src="../kendo.custom.min.js"></script>
+	
+	</head>
+<body>
+
+
+<div ng-app="myApp" ng-controller="myCtrl">
+
+  <button ng-click="add()">Add Dyanmically</button>
+  <div class="test"></div>
+  
+</div>
+  
+</div>
+
+</body>
+
+
+<script>
+var app = angular.module('myApp', ["kendo.directives"]);
+app.directive('mapTableContentKeyValue', function() { 
+  return {
+    restrict: 'A',
+    transclude: true,
+    scope: { contents: '=mapTableContentKeyValue' },
+    template: '<div kendo-grid options="kOpt" k-rebind="kOpt"></div>',
+    controller: function($scope)
+    {
+	  const columns = [
+			{headerTemplate: "", field: "type", width: 150},
+			{title: "Value", width: 250, template: (dataItem) => dataItem.value }
+		]
+	  const dataSource = Object.keys($scope.contents).map(a => ({	"type" : a,	"value" : $scope.contents[a]}));
+	  $scope.kOpt = {columns,dataSource};
+    }
+  };
+});
+app.controller('myCtrl', function($scope, $compile) {
+
+	 $scope.mainGridOptions = {
+		columns: [
+			{ locked: true, field: "module", lockable: false, width:250 },
+			{ field:"buffer", visible: false},
+			{ field: "ou", 
+			headerTemplate: (dataItem) => {console.log(dataItem);`<div>${dataItem.ou}<br/><input type="checkbox"></div>`;}, 
+			width: 100,
+				template: (dataItem) => `${dataItem.ou}<input type="checkbox">`}
+		  ],
+	  dataSource: [
+		  { module: "Attendance", ou: "A" },
+		  { module: "Harvesting", ou: "B" },
+		  { module: "Collection", ou: "C" },
+		  { module: "Evacuation", ou: "D" }
+	  ]
+	};
+
+	$scope.add = () => {
+		$scope.objKeyValue = {};
+		$scope.objKeyValue["Type"] = "Infield";
+		$scope.objKeyValue["Date"] = "2022-03-01";
+		$scope.objKeyValue["Created Time"] = "2022-03-01";
+		$scope.objKeyValue["Gang"] = "g1";
+		$scope.objKeyValue["Har"] = "h1";
+		$scope.objKeyValue["Blo"] = "b1";
+		$scope.objKeyValue["Chit"] = "c1";
+		$scope.objKeyValue["Bunches"] = "b1";
+		$scope.objKeyValue["Ch1"] = "cc";
+		$scope.objKeyValue["Evacuated On"] = "zz";
+		$scope.objKeyValue["Evacuated By (Planning)"] = "ee";
+		$scope.objKeyValue["Vehicle Reg No. (Planning)"] = "ww";
+		
+		
+		const html = `<div map-table-content-key-value="objKeyValue"></div>`;
+		const result = $compile(html)($scope);
+		$(".test").html(result);
+
+	}
+				
+});
+</script>
+</html>
