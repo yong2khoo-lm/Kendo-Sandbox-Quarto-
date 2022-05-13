@@ -22,8 +22,9 @@
   <button ng-click="initGridWithDirective()">Init Grid With Directive</button>
   <button ng-click="addOU()">Add OU (With Directive)</button>
   <br/>
+  <br/>
    <button ng-click="initGridWithoutDirective()">Init Grid Without Directive</button>
-  <button ng-click="addOUWithoutDirective()">Add OU (Without Directive)</button>
+   <button ng-click="debugData()">Debug Data</button>
   <div class="test"></div>
   
   
@@ -166,13 +167,21 @@ app.controller('myCtrl', function($scope, $compile) {
 	*	- Data stored in this way: [{module: "Attd", OU1: value1, OU2: value2}, {module:"Har", OU1: value1, OU2: value2}]
 	*	- Since OU could be not easily handle-able string, so it is better to use KEY
 	*/
+	$scope.onChangeCheckbox = (_d) => {
+		console.log(_d);
+	}
+	$scope.debugData = () => {
+		console.log($scope.kOpt.dataSource);
+	}
 	$scope.initGridWithoutDirective = () => {
 		const ouData = [getRandomOU(), getRandomOU(), getRandomOU()]; console.log(ouData);
 		const baseColumn = [{headerTemplate: () => "Modules", field: "module", width: 100, locked: true}]
 		const moreColumns = ouData.map(a => ({headerTemplate: () => a.ou, width: 100, 
 			template: (dataItem) => {
-				return dataItem[`OU${a.localOUKey}`];
+				const checked = dataItem[`OU${a.localOUKey}`] ? "checked=checked" : "";
+				return `<input type="checkbox" ${checked} ng-click="onChangeCheckbox($event)">`;
 			}
+			
 		}));
 		const columns = [...baseColumn, ...moreColumns];
 		const dataSource = [
@@ -202,21 +211,14 @@ app.controller('myCtrl', function($scope, $compile) {
 			return {...result};
 		}
 	}
-	
-	$scope.addOUWithoutDirective = () => {
-		const ouDataAdd = [getRandomOU(), getRandomOU()];
-		const moreColumns = ouDataAdd.map(a => ({headerTemplate: () => a.ou, title: "Value", width: 100, template: (dataItem) => dataItem.value}));
-		$scope.kOpt.columns = [...$scope.kOpt.columns, ...moreColumns];
-	}	
-	
+
 	let ouKey = 1;
 	function getRandomOU() {
 		const ou = getOU(5);
 		const localOUKey = ouKey++;
-		const attendance = Math.random() < 0.5;
+		const attendance = true;//Math.random() < 0.5;
 		const harvesting = Math.random() < 0.5;
 		const evacuation = Math.random() < 0.5;
-		//return {ou, attendance, harvesting, evacuation};
 		return {ou, localOUKey, modules: [{module: "Attendance", value: attendance}, 
 			{module: "Harvesting", value: harvesting}, 
 			{module: "Evacuation", value: evacuation}]};
