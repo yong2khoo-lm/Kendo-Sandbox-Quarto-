@@ -168,14 +168,39 @@ app.controller('myCtrl', function($scope, $compile) {
 	*/
 	$scope.initGridWithoutDirective = () => {
 		const ouData = [getRandomOU(), getRandomOU(), getRandomOU()]; console.log(ouData);
-		const baseColumn = [{headerTemplate: () => "Modules", field: "module", width: 150}]
-		const moreColumns = ouData.map(a => ({headerTemplate: () => a.ou, title: "Value", width: 100, template: (dataItem) => dataItem.value}));
+		const baseColumn = [{headerTemplate: () => "Modules", field: "module", width: 100, locked: true}]
+		const moreColumns = ouData.map(a => ({headerTemplate: () => a.ou, width: 100, 
+			template: (dataItem) => {
+				return dataItem[`OU${a.localOUKey}`];
+			}
+		}));
 		const columns = [...baseColumn, ...moreColumns];
 		const dataSource = [
 			...ouData[0].modules.map(a => ({module: a.module}))
 		];
-		console.log(dataSource);
-		$scope.kOpt = {columns, dataSource};
+		const attendanceRow = getRowByModule("Attendance");
+		const harvestingRow = getRowByModule("Harvesting");
+		const evacuationRow = getRowByModule("Evacuation");
+
+		$scope.kOpt = {columns, dataSource: [attendanceRow, harvestingRow, evacuationRow]};
+
+		function getRowByModule(_module){
+			const result = ouData.map(a => {
+				return a.modules.filter(b => b.module === _module).map(b => {
+					const p = {};
+					const ouKey = `OU${a.localOUKey}`;
+					p[ouKey] = b.value;
+					return p;
+				});
+			}).flat()
+			  .reduce((result, currentObject) => {
+				for(var key in currentObject){
+					result[key] = currentObject[key];
+				}
+				return result;
+			  }, {module: _module});
+			return {...result};
+		}
 	}
 	
 	$scope.addOUWithoutDirective = () => {
