@@ -18,8 +18,16 @@
 
 <div ng-app="myApp" ng-controller="myCtrl">
 
-  <button ng-click="add()">Add Dyanmically</button>
+  <button ng-click="add()">Add Dynamically</button>
+  <button ng-click="initGridWithDirective()">Init Grid With Directive</button>
+  <button ng-click="addOU()">Add OU (With Directive)</button>
+  <br/>
+   <button ng-click="initGridWithoutDirective()">Init Grid Without Directive</button>
+  <button ng-click="addOUWithoutDirective()">Add OU (Without Directive)</button>
   <div class="test"></div>
+  
+  
+  <div kendo-grid options="kOpt" k-rebind="kOpt"></div>
   
 </div>
   
@@ -47,6 +55,27 @@ app.directive('mapTableContentKeyValue', function() {
     }
   };
 });
+
+app.directive('mapTableContentBasic', function () {
+    return {
+        restrict: 'A',
+        transclude: true,
+        scope: { contents: '=mapTableContentBasic'},
+        template: '<div kendo-grid options="kOpt" k-rebind="kOpt"></div>',
+        controller: function ($scope) {
+            if (!Boolean($scope.contents)) return;
+			
+			$scope.$watch('contents', function(newValue, oldValue) {
+				if(newValue){
+					const columns = $scope.contents.columns;
+					const dataSource = $scope.contents.dataSource;
+					$scope.kOpt = { columns, dataSource };
+				}
+			});
+        }
+    };
+});
+
 app.controller('myCtrl', function($scope, $compile) {
 
 	 $scope.mainGridOptions = {
@@ -87,7 +116,96 @@ app.controller('myCtrl', function($scope, $compile) {
 		$(".test").html(result);
 
 	}
-				
+	
+	$scope.initGridWithDirective = () => {
+		const columns = [
+			{headerTemplate: () => "Modules", field: "type", width: 150},
+			{headerTemplate: () => "OU1", title: "Value", width: 250, template: (dataItem) => dataItem.value }
+		];
+		const dataSource = [
+		
+		]
+		$scope.gridData = {columns, dataSource};
+		const html = `<div map-table-content-basic="gridData"></div>`;
+		const result = $compile(html)($scope);
+		$(".test").html(result);
+	}
+	
+	$scope.initGridWithDirective = () => {
+		const columns = [
+			{headerTemplate: () => "Modules", field: "type", width: 150},
+			{headerTemplate: () => "OU1", title: "Value", width: 250, template: (dataItem) => dataItem.value }
+		];
+		const dataSource = [
+		
+		]
+		$scope.gridData = {columns, dataSource};
+		const html = `<div map-table-content-basic="gridData"></div>`;
+		const result = $compile(html)($scope);
+		$(".test").html(result);
+	}
+	
+	$scope.addOU = () => {
+		const columns = [
+			{headerTemplate: () => "Modules", field: "type", width: 50},
+			{headerTemplate: () => "OU1", title: "Value", width: 100, template: (dataItem) => dataItem.value },
+			{headerTemplate: () => "OU2", title: "Value", width: 100, template: (dataItem) => dataItem.value }
+		];
+		const dataSource = [
+		
+		]
+		console.log(columns);
+		$scope.gridData = {columns, dataSource};
+	}
+	
+	//=========================================================================================//
+	/*
+	*	Default: 
+	*	- Data stored in this way: [{ou:"OU1", value:1}, {ou:"OU2", value:2}]
+	*	Dynamic column:
+	*	- Data stored in this way: [{module: "Attd", OU1: value1, OU2: value2}, {module:"Har", OU1: value1, OU2: value2}]
+	*	- Since OU could be not easily handle-able string, so it is better to use KEY
+	*/
+	$scope.initGridWithoutDirective = () => {
+		const ouData = [getRandomOU(), getRandomOU(), getRandomOU()]; console.log(ouData);
+		const baseColumn = [{headerTemplate: () => "Modules", field: "module", width: 150}]
+		const moreColumns = ouData.map(a => ({headerTemplate: () => a.ou, title: "Value", width: 100, template: (dataItem) => dataItem.value}));
+		const columns = [...baseColumn, ...moreColumns];
+		const dataSource = [
+			...ouData[0].modules.map(a => ({module: a.module}))
+		];
+		console.log(dataSource);
+		$scope.kOpt = {columns, dataSource};
+	}
+	
+	$scope.addOUWithoutDirective = () => {
+		const ouDataAdd = [getRandomOU(), getRandomOU()];
+		const moreColumns = ouDataAdd.map(a => ({headerTemplate: () => a.ou, title: "Value", width: 100, template: (dataItem) => dataItem.value}));
+		$scope.kOpt.columns = [...$scope.kOpt.columns, ...moreColumns];
+	}	
+	
+	let ouKey = 1;
+	function getRandomOU() {
+		const ou = getOU(5);
+		const localOUKey = ouKey++;
+		const attendance = Math.random() < 0.5;
+		const harvesting = Math.random() < 0.5;
+		const evacuation = Math.random() < 0.5;
+		//return {ou, attendance, harvesting, evacuation};
+		return {ou, localOUKey, modules: [{module: "Attendance", value: attendance}, 
+			{module: "Harvesting", value: harvesting}, 
+			{module: "Evacuation", value: evacuation}]};
+	};
+	
+	function getOU(length) {
+		let result           = '';
+		const characters       = 'ABCDE123';
+		const charactersLength = characters.length;
+		for ( let i = 0; i < length; i++ ) {
+		  result += characters.charAt(Math.floor(Math.random() * charactersLength));
+	   }
+	   return result;
+	}
 });
 </script>
 </html>
